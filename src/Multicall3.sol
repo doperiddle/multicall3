@@ -151,7 +151,7 @@ contract Multicall3 {
                     mstore(0x24, 0x0000000000000000000000000000000000000000000000000000000000000017)
                     // set revert string: bytes32(abi.encodePacked("Multicall3: call failed"))
                     mstore(0x44, 0x4d756c746963616c6c333a2063616c6c206661696c6564000000000000000000)
-                    revert(0x00, 0x84)
+                    revert(0x00, 0x64)
                 }
             }
             unchecked { ++i; }

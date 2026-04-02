@@ -78,6 +78,8 @@ contract Multicall2 {
     }
 
     function getLastBlockHash() public view returns (bytes32 blockHash) {
-        blockHash = blockhash(block.number - 1);
+        unchecked {
+            blockHash = blockhash(block.number - 1);
+        }
     }
 }
