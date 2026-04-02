@@ -39,6 +39,25 @@ contract MulticallTest is Test {
     multicall.aggregate(calls);
   }
 
+  function testAggregateEmpty() public {
+    Multicall.Call[] memory calls = new Multicall.Call[](0);
+    (uint256 blockNumber, bytes[] memory returnData) = multicall.aggregate(calls);
+    assertEq(blockNumber, block.number);
+    assertEq(returnData.length, 0);
+  }
+
+  function testAggregateMultipleCalls() public {
+    Multicall.Call[] memory calls = new Multicall.Call[](3);
+    calls[0] = Multicall.Call(address(callee), abi.encodeWithSignature("getBlockHash(uint256)", block.number));
+    calls[1] = Multicall.Call(address(multicall), abi.encodeWithSignature("getCurrentBlockTimestamp()"));
+    calls[2] = Multicall.Call(address(multicall), abi.encodeWithSignature("getCurrentBlockGasLimit()"));
+    (, bytes[] memory returnData) = multicall.aggregate(calls);
+    assertEq(returnData.length, 3);
+    assertEq(keccak256(returnData[0]), keccak256(abi.encodePacked(blockhash(block.number))));
+    assertEq(abi.decode(returnData[1], (uint256)), block.timestamp);
+    assertEq(abi.decode(returnData[2], (uint256)), block.gaslimit);
+  }
+
   /// >>>>>>>>>>>>>>>>>>>>>>  HELPER TESTS  <<<<<<<<<<<<<<<<<<<<<<< ///
 
   function testGetEthBalance(address addr) public {
