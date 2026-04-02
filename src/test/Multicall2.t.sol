@@ -85,6 +85,51 @@ contract Multicall2Test is Test {
     multicall.blockAndAggregate(calls);
   }
 
+  /// >>>>>>>>>>>>>>>>>>  EMPTY CALLS ARRAY TESTS  <<<<<<<<<<<<<<<< ///
+
+  function testAggregateEmpty() public {
+    Multicall2.Call[] memory calls = new Multicall2.Call[](0);
+    (uint256 blockNumber, bytes[] memory returnData) = multicall.aggregate(calls);
+    assertEq(blockNumber, block.number);
+    assertEq(returnData.length, 0);
+  }
+
+  function testTryAggregateEmpty() public {
+    Multicall2.Call[] memory calls = new Multicall2.Call[](0);
+    Multicall2.Result[] memory returnData = multicall.tryAggregate(false, calls);
+    assertEq(returnData.length, 0);
+  }
+
+  function testTryBlockAndAggregateEmpty() public {
+    Multicall2.Call[] memory calls = new Multicall2.Call[](0);
+    (uint256 blockNumber, bytes32 blockHash, Multicall2.Result[] memory returnData) = multicall.tryBlockAndAggregate(false, calls);
+    assertEq(blockNumber, block.number);
+    assertEq(blockHash, blockhash(block.number));
+    assertEq(returnData.length, 0);
+  }
+
+  function testBlockAndAggregateEmpty() public {
+    Multicall2.Call[] memory calls = new Multicall2.Call[](0);
+    (uint256 blockNumber, bytes32 blockHash, Multicall2.Result[] memory returnData) = multicall.blockAndAggregate(calls);
+    assertEq(blockNumber, block.number);
+    assertEq(blockHash, blockhash(block.number));
+    assertEq(returnData.length, 0);
+  }
+
+  /// >>>>>>>>>>>>>>  BLOCK AND AGGREGATE SUCCESS TEST  <<<<<<<<<<< ///
+
+  function testBlockAndAggregateSuccess() public {
+    Multicall2.Call[] memory calls = new Multicall2.Call[](2);
+    calls[0] = Multicall2.Call(address(callee), abi.encodeWithSignature("getBlockHash(uint256)", block.number));
+    calls[1] = Multicall2.Call(address(multicall), abi.encodeWithSignature("getBlockNumber()"));
+    (uint256 blockNumber, bytes32 blockHash, Multicall2.Result[] memory returnData) = multicall.blockAndAggregate(calls);
+    assertEq(blockNumber, block.number);
+    assertEq(blockHash, blockhash(block.number));
+    assertTrue(returnData[0].success);
+    assertTrue(returnData[1].success);
+    assertEq(abi.decode(returnData[1].returnData, (uint256)), block.number);
+  }
+
   /// >>>>>>>>>>>>>>>>>>>>>>  HELPER TESTS  <<<<<<<<<<<<<<<<<<<<<<< ///
 
   function testGetBlockHash(uint256 blockNumber) public {
