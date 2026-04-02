@@ -32,7 +32,9 @@ contract Multicall {
     }
 
     function getLastBlockHash() public view returns (bytes32 blockHash) {
-        blockHash = blockhash(block.number - 1);
+        unchecked {
+            blockHash = blockhash(block.number - 1);
+        }
     }
 
     function getCurrentBlockTimestamp() public view returns (uint256 timestamp) {
